@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* CSS СТИЛІ */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
         :root {
@@ -125,7 +126,7 @@
             </div>
         </div>
 
-        <!-- Setup View -->
+        <!-- Setup View (Перша реєстрація) -->
         <section id="setup-view" class="hidden">
             <div class="max-w-md mx-auto mt-10 bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 text-center">
                 <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-3">
@@ -226,7 +227,7 @@
         </section>
     </main>
 
-    <!-- Modal -->
+    <!-- Modal Підтвердження -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-[100] p-6">
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-10 shadow-2xl animate-in zoom-in duration-300">
             <h3 class="text-2xl font-extrabold mb-3 tracking-tight">Видалити?</h3>
@@ -238,11 +239,12 @@
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- Toast Повідомлення -->
     <div id="msg-box" class="fixed bottom-10 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-500 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[100]">
         <span id="msg-text" class="text-sm font-bold tracking-wide"></span>
     </div>
 
+    <!-- JAVASCRIPT ЛОГІКА -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -266,16 +268,23 @@
         let deleteIdPending = null;
         let userData = null;
 
-        // Navigation
+        // Навігація між екранами
         window.navigateTo = (view) => {
             const views = ['home-view', 'admin-view', 'detail-view', 'login-view', 'setup-view'];
-            views.forEach(v => document.getElementById(v).classList.add('hidden'));
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
             const target = document.getElementById(`${view}-view`);
-            if (target) target.classList.remove('hidden');
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('animate-in', 'fade-in', 'duration-500');
+            }
             window.scrollTo({top: 0, behavior: 'smooth'});
             updateNavUI();
         };
 
+        // Оновлення інтерфейсу навігації залежно від статусу
         const updateNavUI = () => {
             const adminBtn = document.getElementById('admin-nav-btn');
             const logoutBtn = document.getElementById('logout-btn');
@@ -337,15 +346,16 @@
             });
         };
 
-        // ФУНКЦІЯ СИНХРОНІЗАЦІЇ ДАНИХ КОРИСТУВАЧА
+        // Синхронізація даних користувача з Firestore
         const syncUserData = async () => {
             const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
             try {
                 const snap = await getDoc(settingsDoc);
                 if (snap.exists()) {
                     userData = snap.data();
-                    document.getElementById('login-welcome').innerText = `Вітаємо, ${userData.name}! Роль: ${userData.role}.`;
-                    // Оновлений статичний заголовок
+                    const loginWelcome = document.getElementById('login-welcome');
+                    if (loginWelcome) loginWelcome.innerText = `Вітаємо, авторе!`;
+                    
                     document.getElementById('blog-title').innerHTML = `АВТОРСЬКИЙ <span class="text-indigo-600">БЛОГ</span>`;
                     updateNavUI();
                 } else {
@@ -356,6 +366,7 @@
             }
         };
 
+        // Реальний час синхронізації статей
         const setupArticlesSync = () => {
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
             onSnapshot(colRef, (snapshot) => {
@@ -368,11 +379,11 @@
             });
         };
 
-        // Handlers
+        // Обробники подій
         window.handleAdminClick = () => {
             if (userData) {
                 if (userData.role === 'admin') navigateTo('admin');
-                else showMessage("Доступ обмежено. Змініть роль на 'admin' у базі даних.");
+                else showMessage("Ваша роль: user. Змініть її в консолі Firebase на 'admin'.");
             } else {
                 navigateTo('login');
             }
@@ -401,7 +412,7 @@
                 const data = snap.data();
                 if (pass === data.password) {
                     userData = data;
-                    showMessage(`Вхід успішний! Вітаємо, ${data.name}.`);
+                    showMessage(`Вхід успішний! Вітаємо, авторе.`);
                     if (data.role === 'admin') navigateTo('admin');
                     else navigateTo('home');
                 } else {
@@ -416,7 +427,7 @@
             showMessage("Ви вийшли з системи.");
         };
 
-        // Rendering
+        // Візуалізація списків
         const renderHome = (articles) => {
             const container = document.getElementById('articles-container');
             if (!container) return;
@@ -429,8 +440,9 @@
                     <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-extrabold rounded-full uppercase mb-4 w-fit tracking-wider">${a.category || 'Загальне'}</span>
                     <h3 class="text-2xl font-extrabold mb-4 group-hover:text-indigo-600 transition-colors tracking-tight">${a.title}</h3>
                     <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed">${a.content}</p>
-                    <div class="mt-auto pt-4 border-t border-slate-50 text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-                        ${a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleDateString() : 'Зараз'}
+                    <div class="mt-auto pt-4 border-t border-slate-50 text-[10px] text-slate-300 font-bold uppercase tracking-widest flex justify-between items-center">
+                        <span class="truncate pr-2">${a.author || 'МОСТОВИЙ Віктор'}</span>
+                        <span class="shrink-0">${a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleDateString() : 'Зараз'}</span>
                     </div>
                 </div>
             `).join('');
@@ -444,7 +456,7 @@
                 return;
             }
             list.innerHTML = articles.map(a => `
-                <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-50 shadow-sm">
+                <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-50 shadow-sm hover:border-indigo-100 transition-colors">
                     <div class="truncate mr-4">
                         <h4 class="font-extrabold truncate text-slate-800">${a.title}</h4>
                         <span class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">${a.category}</span>
@@ -469,7 +481,7 @@
             }
         };
 
-        // CRUD
+        // CRUD операції
         document.getElementById('article-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!userData || userData.role !== 'admin') {
@@ -493,8 +505,11 @@
                     });
                     showMessage("Зміни збережено!");
                 } else {
+                    // Додаємо ім'я автора при створенні статті
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'articles'), { 
-                        title, category, content, createdAt: serverTimestamp() 
+                        title, category, content, 
+                        author: userData.name,
+                        createdAt: serverTimestamp() 
                     });
                     showMessage("Опубліковано успішно!");
                 }
