@@ -91,7 +91,8 @@
                         <i class="fas fa-feather-alt"></i>
                     </div>
                     <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
-                        МОСТОВИЙ Віктор
+                        <span class="sm:hidden">МВ</span>
+                        <span class="hidden sm:inline">МОСТОВИЙ Віктор</span>
                     </span>
                 </div>
                 
@@ -303,11 +304,11 @@
 
                 if (userData.role === 'admin') {
                     adminBtn?.classList.remove('hidden');
-                    statusTag.className = "flex items-center space-x-2 px-4 py-1.5 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 shadow-sm";
-                    statusIcon.className = "fas fa-shield-halved text-[10px]";
+                    statusTag.className = "flex items-center space-x-1 sm:space-x-2 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 shadow-sm";
+                    statusIcon.className = "fas fa-shield-halved text-[8px] sm:text-[10px]";
                 } else {
-                    statusTag.className = "flex items-center space-x-2 px-4 py-1.5 rounded-full border border-slate-100 bg-slate-50 text-slate-600 shadow-sm";
-                    statusIcon.className = "fas fa-user text-[10px]";
+                    statusTag.className = "flex items-center space-x-1 sm:space-x-2 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-100 bg-slate-50 text-slate-600 shadow-sm";
+                    statusIcon.className = "fas fa-user text-[8px] sm:text-[10px]";
                 }
             } else {
                 adminBtn?.classList.remove('hidden');
@@ -432,15 +433,15 @@
             const container = document.getElementById('articles-container');
             if (!container) return;
             if (articles.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-xs">Немає жодної публікації</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 sm:py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Немає жодної публікації</div>`;
                 return;
             }
             container.innerHTML = articles.map(a => `
-                <div class="article-card group bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50 cursor-pointer flex flex-col h-full" onclick="viewArticle('${a.id}')">
-                    <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-extrabold rounded-full uppercase mb-4 w-fit tracking-wider">${a.category || 'Загальне'}</span>
-                    <h3 class="text-2xl font-extrabold mb-4 group-hover:text-indigo-600 transition-colors tracking-tight">${a.title}</h3>
-                    <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed">${a.content}</p>
-                    <div class="mt-auto pt-4 border-t border-slate-50 text-[10px] text-slate-300 font-bold uppercase tracking-widest flex justify-between items-center">
+                <div class="article-card group bg-white p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-sm border border-slate-50 cursor-pointer flex flex-col h-full" onclick="viewArticle('${a.id}')">
+                    <span class="px-3 py-1 sm:px-4 sm:py-1.5 bg-indigo-50 text-indigo-600 text-[9px] sm:text-[10px] font-extrabold rounded-full uppercase mb-3 sm:mb-4 w-fit tracking-wider">${a.category || 'Загальне'}</span>
+                    <h3 class="text-xl sm:text-2xl font-extrabold mb-3 sm:mb-4 group-hover:text-indigo-600 transition-colors tracking-tight">${a.title}</h3>
+                    <p class="text-slate-500 text-xs sm:text-sm line-clamp-3 mb-6 sm:mb-8 leading-relaxed">${a.content}</p>
+                    <div class="mt-auto pt-3 sm:pt-4 border-t border-slate-50 text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest flex justify-between items-center">
                         <span class="truncate pr-2">${a.author || 'МОСТОВИЙ Віктор'}</span>
                         <span class="shrink-0">${a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleDateString() : 'Зараз'}</span>
                     </div>
@@ -452,18 +453,18 @@
             const list = document.getElementById('admin-articles-list');
             if (!list) return;
             if (!userData || userData.role !== 'admin') {
-                list.innerHTML = `<p class="text-center py-4 text-slate-400 font-medium">Керування доступне лише адміністраторам.</p>`;
+                list.innerHTML = `<p class="text-center py-4 text-slate-400 font-medium text-sm">Керування доступне лише адміністраторам.</p>`;
                 return;
             }
             list.innerHTML = articles.map(a => `
-                <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-50 shadow-sm hover:border-indigo-100 transition-colors">
-                    <div class="truncate mr-4">
-                        <h4 class="font-extrabold truncate text-slate-800">${a.title}</h4>
-                        <span class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">${a.category}</span>
+                <div class="flex items-center justify-between p-4 sm:p-5 bg-white rounded-xl sm:rounded-2xl border border-slate-50 shadow-sm hover:border-indigo-100 transition-colors">
+                    <div class="truncate mr-3 sm:mr-4">
+                        <h4 class="font-extrabold truncate text-slate-800 text-sm sm:text-base">${a.title}</h4>
+                        <span class="text-[8px] sm:text-[9px] font-bold text-slate-300 uppercase tracking-widest">${a.category}</span>
                     </div>
-                    <div class="flex space-x-2 shrink-0">
-                        <button onclick="editArticle('${a.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors"><i class="fas fa-edit"></i></button>
-                        <button onclick="confirmDelete('${a.id}')" class="w-10 h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"><i class="fas fa-trash-alt"></i></button>
+                    <div class="flex space-x-1 sm:space-x-2 shrink-0">
+                        <button onclick="editArticle('${a.id}')" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-indigo-500 hover:bg-indigo-50 rounded-lg sm:rounded-xl transition-colors"><i class="fas fa-edit text-xs sm:text-base"></i></button>
+                        <button onclick="confirmDelete('${a.id}')" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-lg sm:rounded-xl transition-colors"><i class="fas fa-trash-alt text-xs sm:text-base"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -474,8 +475,8 @@
             if (snap.exists()) {
                 const d = snap.data();
                 document.getElementById('article-full-content').innerHTML = `
-                    <h1 class="text-4xl font-extrabold mb-6 leading-tight tracking-tight">${d.title}</h1>
-                    <div class="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">${d.content}</div>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 leading-tight tracking-tight">${d.title}</h1>
+                    <div class="prose prose-sm sm:prose-base max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">${d.content}</div>
                 `;
                 navigateTo('detail');
             }
