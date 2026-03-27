@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій Авторський Блог - Ролі Користувачів</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .article-card:hover {
+            transform: translateY(-4px);
+            transition: all 0.3s ease;
+        }
+        .loader {
+            border-top-color: #3b82f6;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modal-active {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="navigateTo('home')">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        MyBlog
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="navigateTo('home')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Головна</button>
+                    
+                    <!-- User Status Tag -->
+                    <div id="user-status-tag" class="hidden items-center space-x-2 px-3 py-1 rounded-full border">
+                        <i id="status-icon" class="fas text-xs"></i>
+                        <span id="display-user-name" class="text-xs font-bold">Користувач</span>
+                    </div>
+
+                    <button id="admin-nav-btn" onclick="handleAdminClick()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Адмінка</button>
+                    <button id="logout-btn" onclick="logoutUser()" class="hidden text-red-500 hover:bg-red-50 px-3 py-2 rounded-md text-sm font-medium">Вийти</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Error Alert -->
+        <div id="config-error" class="hidden mb-8 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl">
+            <h3 class="font-bold flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i> Помилка Firebase</h3>
+            <p class="text-sm mt-1" id="error-message"></p>
+        </div>
+
+        <!-- Setup View (Register) -->
+        <section id="setup-view" class="hidden">
+            <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-xl border border-blue-100 text-center">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-plus text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Створення профілю</h2>
+                <p class="text-gray-500 mb-8 text-sm">Встановіть ім'я та пароль. Роль "user" буде призначена автоматично.</p>
+                <form id="setup-form" class="space-y-4">
+                    <input type="text" id="setup-name" required placeholder="Ваше ім'я" class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    
+                    <input type="password" id="setup-password" required minlength="4" class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Пароль">
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200">Створити акаунт</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Login View -->
+        <section id="login-view" class="hidden">
+            <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-xl border border-gray-100 text-center">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-key text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Вхід у систему</h2>
+                <p id="login-welcome" class="text-gray-500 mb-8 text-sm">Будь ласка, введіть ваш пароль.</p>
+                <form id="login-form" class="space-y-4">
+                    <input type="password" id="admin-password-input" required class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-center text-lg tracking-widest" placeholder="••••••••">
+                    <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition">Увійти</button>
+                </form>
+                <button onclick="navigateTo('home')" class="mt-4 text-gray-400 text-sm hover:text-gray-600">Скасувати</button>
+            </div>
+        </section>
+
+        <!-- Home View -->
+        <section id="home-view">
+            <header class="mb-12 text-center">
+                <h1 id="blog-title" class="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">Мій Блог</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Ділюся цікавими історіями. Доступ до адмінки налаштовується в базі даних.</p>
+            </header>
+            <div id="articles-container" class="grid gap-8 md:grid-cols-2">
+                <div class="col-span-full flex justify-center py-12" id="initial-loader">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin View -->
+        <section id="admin-view" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+                        <h2 id="form-title" class="text-xl font-bold mb-6 flex items-center text-gray-800">
+                            <i class="fas fa-plus-circle mr-3 text-blue-600"></i> Нова стаття
+                        </h2>
+                        <form id="article-form" class="space-y-4">
+                            <input type="hidden" id="edit-id" value="">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Заголовок</label>
+                                <input type="text" id="post-title" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Категорія</label>
+                                <select id="post-category" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    <option value="Технології">Технології</option>
+                                    <option value="Життя">Життя</option>
+                                    <option value="Дизайн">Дизайн</option>
+                                    <option value="Програмування">Програмування</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Текст</label>
+                                <textarea id="post-content" rows="6" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition"></textarea>
+                            </div>
+                            <div class="flex flex-col space-y-2 pt-2">
+                                <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">Опублікувати</button>
+                                <button type="button" id="cancel-edit" class="hidden w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Скасувати</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-xl font-bold mb-6">Панель управління</h2>
+                        <div id="admin-articles-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detail View -->
+        <section id="detail-view" class="hidden max-w-3xl mx-auto">
+            <button onclick="navigateTo('home')" class="mb-6 text-blue-600 hover:underline flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Назад
+            </button>
+            <article id="article-full-content" class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50"></article>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Видалити?</h3>
+            <p class="text-gray-600 mb-6">Ця дія видалить статтю назавжди.</p>
+            <div class="flex space-x-3">
+                <button id="modal-cancel" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold">Скасувати</button>
+                <button id="modal-confirm" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold">Видалити</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="msg-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[100]">
+        <span id="msg-text"></span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc, deleteDoc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwNELz03aj8yJzKcCho7WUccVcfLO1u3E",
+            authDomain: "mvvblog-5b827.firebaseapp.com",
+            projectId: "mvvblog-5b827",
+            storageBucket: "mvvblog-5b827.firebasestorage.app",
+            messagingSenderId: "1034009255503",
+            appId: "1:1034009255503:web:d90356bd4ebdf7efab143a"
+        };
+
+        const appId = firebaseConfig.projectId;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let deleteIdPending = null;
+        let userData = JSON.parse(sessionStorage.getItem('userData')) || null;
+
+        // Navigation
+        window.navigateTo = (view) => {
+            const views = ['home-view', 'admin-view', 'detail-view', 'login-view', 'setup-view'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`${view}-view`);
+            if (target) target.classList.remove('hidden');
+            window.scrollTo(0, 0);
+            updateNavUI();
+        };
+
+        const updateNavUI = () => {
+            const adminBtn = document.getElementById('admin-nav-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const statusTag = document.getElementById('user-status-tag');
+            const statusIcon = document.getElementById('status-icon');
+            const nameDisplay = document.getElementById('display-user-name');
+
+            if (adminBtn) adminBtn.classList.add('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (statusTag) statusTag.classList.add('hidden');
+
+            if (userData) {
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (statusTag) statusTag.classList.remove('hidden');
+                nameDisplay.innerText = userData.name;
+
+                if (userData.role === 'admin') {
+                    if (adminBtn) adminBtn.classList.remove('hidden');
+                    statusTag.className = "flex items-center space-x-2 px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-700";
+                    statusIcon.className = "fas fa-user-shield text-xs";
+                } else {
+                    statusTag.className = "flex items-center space-x-2 px-3 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-600";
+                    statusIcon.className = "fas fa-user text-xs";
+                }
+            } else {
+                if (adminBtn) adminBtn.classList.remove('hidden');
+            }
+        };
+
+        const showMessage = (text) => {
+            const box = document.getElementById('msg-box');
+            document.getElementById('msg-text').innerText = text;
+            box.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 3000);
+        };
+
+        const showErrorAlert = (msg) => {
+            const alert = document.getElementById('config-error');
+            const msgEl = document.getElementById('error-message');
+            alert.classList.remove('hidden');
+            msgEl.innerText = msg;
+        };
+
+        // Firebase Initialization
+        const initApp = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (e) { 
+                console.error("Auth failed", e);
+                showErrorAlert(e.code === 'auth/configuration-not-found' ? "Увімкніть Anonymous Auth у Firebase." : e.message);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                if (user) {
+                    await checkUserSetup();
+                    setupArticlesSync();
+                }
+            });
+        };
+
+        const checkUserSetup = async () => {
+            const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
+            try {
+                const snap = await getDoc(settingsDoc);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('login-welcome').innerText = `Вітаємо, ${data.name}! Введіть пароль для входу.`;
+                    document.getElementById('blog-title').innerText = `Блог: ${data.name}`;
+                    
+                    // Якщо користувач вже залогінений у сесії, оновлюємо дані з бази (у разі зміни ролі в базі)
+                    if (userData) {
+                        userData = data;
+                        sessionStorage.setItem('userData', JSON.stringify(userData));
+                        updateNavUI();
+                    }
+                } else {
+                    navigateTo('setup');
+                }
+            } catch (e) {
+                if (e.code === 'permission-denied') showErrorAlert("Налаштуйте Firestore Rules.");
+            }
+        };
+
+        const setupArticlesSync = () => {
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
+            onSnapshot(colRef, (snapshot) => {
+                const articles = [];
+                snapshot.forEach(d => articles.push({ id: d.id, ...d.data() }));
+                articles.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                renderHome(articles);
+                renderAdminList(articles);
+                const loader = document.getElementById('initial-loader');
+                if (loader) loader.remove();
+            });
+        };
+
+        // Handlers
+        window.handleAdminClick = () => {
+            if (userData) {
+                if (userData.role === 'admin') navigateTo('admin');
+                else showMessage("Доступ обмежено. Ваша роль: user. Змініть роль у базі даних.");
+            } else {
+                navigateTo('login');
+            }
+        };
+
+        document.getElementById('setup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('setup-name').value;
+            const pass = document.getElementById('setup-password').value;
+            try {
+                // Автоматично ставимо роль 'user'
+                const newUserData = { name, role: 'user', password: pass, createdAt: serverTimestamp() };
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), newUserData);
+                userData = newUserData;
+                sessionStorage.setItem('userData', JSON.stringify(userData));
+                showMessage("Профіль створено з роллю user!");
+                navigateTo('home');
+            } catch (err) { showMessage("Помилка збереження."); }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('admin-password-input').value;
+            
+            const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
+            const snap = await getDoc(settingsDoc);
+            
+            if (snap.exists()) {
+                const data = snap.data();
+                if (pass === data.password) {
+                    userData = data;
+                    sessionStorage.setItem('userData', JSON.stringify(userData));
+                    showMessage(`Вхід успішний! Роль: ${data.role}`);
+                    if (data.role === 'admin') navigateTo('admin');
+                    else navigateTo('home');
+                } else {
+                    showMessage("Невірний пароль!");
+                }
+            }
+        });
+
+        window.logoutUser = () => {
+            userData = null;
+            sessionStorage.removeItem('userData');
+            navigateTo('home');
+            showMessage("Ви вийшли");
+        };
+
+        // Articles Rendering
+        const renderHome = (articles) => {
+            const container = document.getElementById('articles-container');
+            if (!container) return;
+            if (articles.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">Статті відсутні.</div>`;
+                return;
+            }
+            container.innerHTML = articles.map(a => `
+                <div class="article-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 cursor-pointer" onclick="viewArticle('${a.id}')">
+                    <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full uppercase">${a.category || 'Загальне'}</span>
+                    <h3 class="text-xl font-bold mt-3 mb-2">${a.title}</h3>
+                    <p class="text-gray-500 text-sm line-clamp-2">${a.content}</p>
+                    <div class="mt-4 text-blue-600 text-xs font-bold">Детальніше →</div>
+                </div>
+            `).join('');
+        };
+
+        const renderAdminList = (articles) => {
+            const list = document.getElementById('admin-articles-list');
+            if (!list) return;
+            if (!userData || userData.role !== 'admin') {
+                list.innerHTML = `<p class="text-center py-4 text-gray-400 italic text-sm">Цей список доступний лише для ролі admin. Поточна роль: ${userData ? userData.role : 'гість'}.</p>`;
+                return;
+            }
+            list.innerHTML = articles.map(a => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="truncate mr-4">
+                        <h4 class="font-bold truncate text-gray-800">${a.title}</h4>
+                        <p class="text-xs text-gray-400">${a.category}</p>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="editArticle('${a.id}')" class="p-2 text-blue-500 hover:bg-white rounded-lg"><i class="fas fa-edit"></i></button>
+                        <button onclick="confirmDelete('${a.id}')" class="p-2 text-red-500 hover:bg-white rounded-lg"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.viewArticle = async (id) => {
+            const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', id));
+            if (snap.exists()) {
+                const d = snap.data();
+                document.getElementById('article-full-content').innerHTML = `
+                    <span class="text-blue-600 font-bold uppercase text-xs tracking-widest">${d.category || 'Загальне'}</span>
+                    <h1 class="text-4xl font-extrabold mt-2 mb-6 text-gray-900">${d.title}</h1>
+                    <div class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">${d.content}</div>
+                `;
+                navigateTo('detail');
+            }
+        };
+
+        // CRUD Articles
+        document.getElementById('article-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userData || userData.role !== 'admin') return showMessage("Потрібні права адміністратора.");
+            
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            const content = document.getElementById('post-content').value;
+            const editId = document.getElementById('edit-id').value;
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
+                if (editId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId), {
+                        title, category, content, updatedAt: serverTimestamp()
+                    });
+                } else {
+                    await addDoc(colRef, { title, category, content, createdAt: serverTimestamp(), author: userData.name });
+                }
+                resetForm();
+                showMessage("Дані збережено!");
+            } catch (err) { showMessage("Помилка доступу до бази."); }
+        });
+
+        window.editArticle = async (id) => {
+            const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', id));
+            if (snap.exists()) {
+                const d = snap.data();
+                document.getElementById('edit-id').value = id;
+                document.getElementById('post-title').value = d.title;
+                document.getElementById('post-category').value = d.category;
+                document.getElementById('post-content').value = d.content;
+                document.getElementById('form-title').innerHTML = `<i class="fas fa-edit mr-3 text-orange-500"></i> Редагувати статтю`;
+                document.getElementById('submit-btn').innerText = "Оновити";
+                document.getElementById('cancel-edit').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        const resetForm = () => {
+            document.getElementById('article-form').reset();
+            document.getElementById('edit-id').value = "";
+            document.getElementById('form-title').innerHTML = `<i class="fas fa-plus-circle mr-3 text-blue-600"></i> Нова стаття`;
+            document.getElementById('submit-btn').innerText = "Опублікувати";
+            document.getElementById('cancel-edit').classList.add('hidden');
+        };
+
+        const cancelEditBtn = document.getElementById('cancel-edit');
+        if (cancelEditBtn) cancelEditBtn.onclick = resetForm;
+
+        window.confirmDelete = (id) => {
+            deleteIdPending = id;
+            document.getElementById('confirm-modal').classList.add('modal-active');
+        };
+
+            const modalCancel = document.getElementById('modal-cancel');
+            if (modalCancel) modalCancel.onclick = () => {
+            document.getElementById('confirm-modal').classList.remove('modal-active');
+            deleteIdPending = null;
+        };
+
+            const modalConfirm = document.getElementById('modal-confirm');
+            if (modalConfirm) modalConfirm.onclick = async () => {
+            if (deleteIdPending) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', deleteIdPending));
+                    showMessage("Видалено успішно");
+                } catch (e) { showMessage("Помилка видалення"); }
+                document.getElementById('confirm-modal').classList.remove('modal-active');
+            }
+        };
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
