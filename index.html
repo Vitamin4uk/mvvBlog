@@ -3,151 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мій Авторський Блог - Ролі Користувачів</title>
+    <title>МОСТОВИЙ Віктор — Авторський Блог</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f9fafb;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --brand-primary: #6366f1;
+            --brand-secondary: #4f46e5;
         }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fdfdfd;
+            scroll-behavior: smooth;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .article-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .article-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+        }
+
+        .bg-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(40px);
+        }
+
+        .loader {
+            border-top-color: var(--brand-primary);
+            animation: spinner 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
             transition: all 0.3s ease;
         }
-        .loader {
-            border-top-color: #3b82f6;
-            animation: spinner 1.5s linear infinite;
+
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
         }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+
         .modal-active {
             display: flex !important;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
-<body class="text-gray-900">
+<body class="text-slate-900 antialiased">
+
+    <div class="bg-blob -top-24 -left-24"></div>
+    <div class="bg-blob bottom-0 right-0" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, rgba(255, 255, 255, 0) 70%);"></div>
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="navigateTo('home')">
-                    <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        MyBlog
+    <nav class="glass sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center cursor-pointer group" onclick="navigateTo('home')">
+                    <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
+                        МОСТОВИЙ Віктор
                     </span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="navigateTo('home')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Головна</button>
+                
+                <div class="flex items-center space-x-6">
+                    <button onclick="navigateTo('home')" class="text-slate-500 hover:text-indigo-600 text-sm font-semibold transition-colors uppercase tracking-widest">Стрічка</button>
                     
-                    <!-- User Status Tag -->
-                    <div id="user-status-tag" class="hidden items-center space-x-2 px-3 py-1 rounded-full border">
-                        <i id="status-icon" class="fas text-xs"></i>
-                        <span id="display-user-name" class="text-xs font-bold">Користувач</span>
+                    <div id="user-status-tag" class="hidden items-center space-x-2 px-4 py-1.5 rounded-full border border-slate-100 bg-white/50 shadow-sm">
+                        <i id="status-icon" class="fas text-[10px]"></i>
+                        <span id="display-user-name" class="text-xs font-bold text-slate-700">Гість</span>
                     </div>
 
-                    <button id="admin-nav-btn" onclick="handleAdminClick()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Адмінка</button>
-                    <button id="logout-btn" onclick="logoutUser()" class="hidden text-red-500 hover:bg-red-50 px-3 py-2 rounded-md text-sm font-medium">Вийти</button>
+                    <button id="admin-nav-btn" onclick="handleAdminClick()" class="text-slate-500 hover:text-indigo-600 text-sm font-semibold uppercase tracking-widest transition-colors">Студія</button>
+                    <button id="logout-btn" onclick="logoutUser()" class="hidden text-rose-500 hover:bg-rose-50 px-4 py-2 rounded-xl text-sm font-bold transition-all border border-transparent hover:border-rose-100">Вихід</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-6xl mx-auto px-6 py-12">
         
         <!-- Error Alert -->
-        <div id="config-error" class="hidden mb-8 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl">
-            <h3 class="font-bold flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i> Помилка Firebase</h3>
-            <p class="text-sm mt-1" id="error-message"></p>
+        <div id="config-error" class="hidden mb-10 bg-rose-50 border border-rose-100 text-rose-700 px-6 py-5 rounded-3xl shadow-sm">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-circle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg leading-none">Повідомлення системи</h3>
+                    <p class="text-sm mt-1 opacity-80" id="error-message"></p>
+                </div>
+            </div>
         </div>
 
-        <!-- Setup View (Register) -->
+        <!-- Setup View -->
         <section id="setup-view" class="hidden">
-            <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-xl border border-blue-100 text-center">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-user-plus text-2xl"></i>
+            <div class="max-w-md mx-auto mt-10 bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 text-center">
+                <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-3">
+                    <i class="fas fa-sparkles text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold mb-2">Створення профілю</h2>
-                <p class="text-gray-500 mb-8 text-sm">Встановіть ім'я та пароль. Роль "user" буде призначена автоматично.</p>
-                <form id="setup-form" class="space-y-4">
-                    <input type="text" id="setup-name" required placeholder="Ваше ім'я" class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    
-                    <input type="password" id="setup-password" required minlength="4" class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Пароль">
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200">Створити акаунт</button>
+                <h2 class="text-3xl font-extrabold mb-3 tracking-tight">Почнемо?</h2>
+                <p class="text-slate-500 mb-10 text-sm leading-relaxed">Створіть свій профіль. Роль <b>user</b> буде призначена автоматично.</p>
+                <form id="setup-form" class="space-y-5">
+                    <input type="text" id="setup-name" required placeholder="Ваше ім'я" class="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-50 outline-none transition-all">
+                    <input type="password" id="setup-password" required minlength="4" class="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-50 outline-none transition-all" placeholder="Секретний пароль">
+                    <button type="submit" class="w-full btn-gradient text-white font-bold py-5 rounded-2xl uppercase tracking-widest text-sm">Створити акаунт</button>
                 </form>
             </div>
         </section>
 
         <!-- Login View -->
         <section id="login-view" class="hidden">
-            <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-xl border border-gray-100 text-center">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-key text-2xl"></i>
+            <div class="max-w-md mx-auto mt-10 bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 text-center">
+                <div class="w-20 h-20 bg-slate-50 text-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                    <i class="fas fa-fingerprint text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold mb-2">Вхід у систему</h2>
-                <p id="login-welcome" class="text-gray-500 mb-8 text-sm">Будь ласка, введіть ваш пароль.</p>
-                <form id="login-form" class="space-y-4">
-                    <input type="password" id="admin-password-input" required class="w-full px-5 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-center text-lg tracking-widest" placeholder="••••••••">
-                    <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition">Увійти</button>
+                <h2 class="text-3xl font-extrabold mb-3 tracking-tight">Вхід</h2>
+                <p id="login-welcome" class="text-slate-500 mb-10 text-sm italic">Введіть ваш ключ доступу.</p>
+                <form id="login-form" class="space-y-5">
+                    <input type="password" id="admin-password-input" required class="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-50 outline-none transition-all text-center text-2xl tracking-[1rem]" placeholder="••••">
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl hover:bg-black transition-all text-sm uppercase tracking-widest">Підтвердити</button>
                 </form>
-                <button onclick="navigateTo('home')" class="mt-4 text-gray-400 text-sm hover:text-gray-600">Скасувати</button>
+                <button onclick="navigateTo('home')" class="mt-6 text-slate-400 text-xs font-semibold hover:text-slate-600 uppercase tracking-widest">Скасувати</button>
             </div>
         </section>
 
         <!-- Home View -->
         <section id="home-view">
-            <header class="mb-12 text-center">
-                <h1 id="blog-title" class="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">Мій Блог</h1>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Ділюся цікавими історіями. Доступ до адмінки налаштовується в базі даних.</p>
+            <header class="mb-16 text-center max-w-2xl mx-auto">
+                <h1 id="blog-title" class="text-5xl font-extrabold text-slate-900 tracking-tight mb-6 sm:text-6xl leading-[1.1]">
+                    АВТОРСЬКИЙ <span class="text-indigo-600">БЛОГ</span>
+                </h1>
+                <p class="text-lg text-slate-500 leading-relaxed font-medium">Ваш персональний простір для текстів.</p>
             </header>
-            <div id="articles-container" class="grid gap-8 md:grid-cols-2">
-                <div class="col-span-full flex justify-center py-12" id="initial-loader">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+            <div id="articles-container" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+                <div class="col-span-full flex flex-col items-center justify-center py-20" id="initial-loader">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-100 h-16 w-16 mb-4"></div>
+                    <p class="text-slate-400 font-medium animate-pulse">Завантаження...</p>
                 </div>
             </div>
         </section>
 
         <!-- Admin View -->
         <section id="admin-view" class="hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-                        <h2 id="form-title" class="text-xl font-bold mb-6 flex items-center text-gray-800">
-                            <i class="fas fa-plus-circle mr-3 text-blue-600"></i> Нова стаття
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-2/5">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 sticky top-32">
+                        <h2 id="form-title" class="text-2xl font-extrabold mb-8 flex items-center text-slate-900">
+                            <i class="fas fa-pen-nib mr-4 text-indigo-600"></i> Створити запис
                         </h2>
-                        <form id="article-form" class="space-y-4">
+                        <form id="article-form" class="space-y-6">
                             <input type="hidden" id="edit-id" value="">
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Заголовок</label>
-                                <input type="text" id="post-title" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Заголовок</label>
+                                <input type="text" id="post-title" required class="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50/30 focus:bg-white outline-none transition-all">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Категорія</label>
-                                <select id="post-category" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                                    <option value="Технології">Технології</option>
-                                    <option value="Життя">Життя</option>
-                                    <option value="Дизайн">Дизайн</option>
-                                    <option value="Програмування">Програмування</option>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Категорія</label>
+                                <select id="post-category" class="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50/30 focus:bg-white outline-none transition-all">
+                                    <option value="Життя">🌿 Життя</option>
+                                    <option value="Кулінарія">👨‍🍳 Кулінарія</option>
+                                    <option value="Програмування">💻 Код</option>
+                                    <option value="Технології">⚡️ Технології</option>
+                                    <option value="Хобі">🧩 Хобі</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Текст</label>
-                                <textarea id="post-content" rows="6" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition"></textarea>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Зміст</label>
+                                <textarea id="post-content" rows="8" required class="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50/30 focus:bg-white outline-none transition-all"></textarea>
                             </div>
-                            <div class="flex flex-col space-y-2 pt-2">
-                                <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">Опублікувати</button>
-                                <button type="button" id="cancel-edit" class="hidden w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Скасувати</button>
+                            <div class="flex flex-col space-y-3 pt-4">
+                                <button type="submit" id="submit-btn" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl shadow-lg uppercase tracking-widest text-xs">Опублікувати</button>
+                                <button type="button" id="cancel-edit" class="hidden w-full bg-slate-100 text-slate-500 font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all text-xs uppercase">Скасувати</button>
                             </div>
                         </form>
                     </div>
                 </div>
-                <div class="lg:col-span-2">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 class="text-xl font-bold mb-6">Панель управління</h2>
+                <div class="lg:w-3/5">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 min-h-[600px]">
+                        <h2 class="text-2xl font-extrabold mb-8">Бібліотека</h2>
                         <div id="admin-articles-list" class="space-y-4"></div>
                     </div>
                 </div>
@@ -156,27 +219,28 @@
 
         <!-- Detail View -->
         <section id="detail-view" class="hidden max-w-3xl mx-auto">
-            <button onclick="navigateTo('home')" class="mb-6 text-blue-600 hover:underline flex items-center">
-                <i class="fas fa-arrow-left mr-2"></i> Назад
+            <button onclick="navigateTo('home')" class="group mb-10 text-slate-400 hover:text-indigo-600 transition-all flex items-center font-bold text-sm uppercase">
+                <i class="fas fa-arrow-left mr-3 transition-transform group-hover:-translate-x-2"></i> Назад
             </button>
-            <article id="article-full-content" class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50"></article>
+            <article id="article-full-content" class="bg-white p-10 md:p-16 rounded-[3rem] shadow-sm border border-slate-50"></article>
         </section>
     </main>
 
-    <!-- Modals -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100] p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-            <h3 class="text-xl font-bold mb-2">Видалити?</h3>
-            <p class="text-gray-600 mb-6">Ця дія видалить статтю назавжди.</p>
-            <div class="flex space-x-3">
-                <button id="modal-cancel" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold">Скасувати</button>
-                <button id="modal-confirm" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold">Видалити</button>
+    <!-- Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-[100] p-6">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-10 shadow-2xl animate-in zoom-in duration-300">
+            <h3 class="text-2xl font-extrabold mb-3 tracking-tight">Видалити?</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Цю дію неможливо буде скасувати.</p>
+            <div class="flex space-x-4">
+                <button id="modal-cancel" class="flex-1 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold uppercase text-xs">Ні</button>
+                <button id="modal-confirm" class="flex-1 px-6 py-4 bg-rose-600 text-white rounded-2xl font-bold uppercase text-xs">Так</button>
             </div>
         </div>
     </div>
 
-    <div id="msg-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[100]">
-        <span id="msg-text"></span>
+    <!-- Toast -->
+    <div id="msg-box" class="fixed bottom-10 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-500 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[100]">
+        <span id="msg-text" class="text-sm font-bold tracking-wide"></span>
     </div>
 
     <script type="module">
@@ -200,18 +264,15 @@
 
         let currentUser = null;
         let deleteIdPending = null;
-        let userData = JSON.parse(sessionStorage.getItem('userData')) || null;
+        let userData = null;
 
         // Navigation
         window.navigateTo = (view) => {
             const views = ['home-view', 'admin-view', 'detail-view', 'login-view', 'setup-view'];
-            views.forEach(v => {
-                const el = document.getElementById(v);
-                if (el) el.classList.add('hidden');
-            });
+            views.forEach(v => document.getElementById(v).classList.add('hidden'));
             const target = document.getElementById(`${view}-view`);
             if (target) target.classList.remove('hidden');
-            window.scrollTo(0, 0);
+            window.scrollTo({top: 0, behavior: 'smooth'});
             updateNavUI();
         };
 
@@ -227,20 +288,20 @@
             if (statusTag) statusTag.classList.add('hidden');
 
             if (userData) {
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-                if (statusTag) statusTag.classList.remove('hidden');
+                logoutBtn?.classList.remove('hidden');
+                statusTag?.classList.remove('hidden');
                 nameDisplay.innerText = userData.name;
 
                 if (userData.role === 'admin') {
-                    if (adminBtn) adminBtn.classList.remove('hidden');
-                    statusTag.className = "flex items-center space-x-2 px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-700";
-                    statusIcon.className = "fas fa-user-shield text-xs";
+                    adminBtn?.classList.remove('hidden');
+                    statusTag.className = "flex items-center space-x-2 px-4 py-1.5 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 shadow-sm";
+                    statusIcon.className = "fas fa-shield-halved text-[10px]";
                 } else {
-                    statusTag.className = "flex items-center space-x-2 px-3 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-600";
-                    statusIcon.className = "fas fa-user text-xs";
+                    statusTag.className = "flex items-center space-x-2 px-4 py-1.5 rounded-full border border-slate-100 bg-slate-50 text-slate-600 shadow-sm";
+                    statusIcon.className = "fas fa-user text-[10px]";
                 }
             } else {
-                if (adminBtn) adminBtn.classList.remove('hidden');
+                adminBtn?.classList.remove('hidden');
             }
         };
 
@@ -248,7 +309,7 @@
             const box = document.getElementById('msg-box');
             document.getElementById('msg-text').innerText = text;
             box.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 3000);
+            setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 4000);
         };
 
         const showErrorAlert = (msg) => {
@@ -258,44 +319,40 @@
             msgEl.innerText = msg;
         };
 
-        // Firebase Initialization
+        // Firebase Life Cycle
         const initApp = async () => {
             try {
                 await signInAnonymously(auth);
             } catch (e) { 
                 console.error("Auth failed", e);
-                showErrorAlert(e.code === 'auth/configuration-not-found' ? "Увімкніть Anonymous Auth у Firebase." : e.message);
+                showErrorAlert("Помилка авторизації Firebase.");
             }
 
             onAuthStateChanged(auth, async (user) => {
                 currentUser = user;
                 if (user) {
-                    await checkUserSetup();
+                    await syncUserData(); 
                     setupArticlesSync();
                 }
             });
         };
 
-        const checkUserSetup = async () => {
+        // ФУНКЦІЯ СИНХРОНІЗАЦІЇ ДАНИХ КОРИСТУВАЧА
+        const syncUserData = async () => {
             const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
             try {
                 const snap = await getDoc(settingsDoc);
                 if (snap.exists()) {
-                    const data = snap.data();
-                    document.getElementById('login-welcome').innerText = `Вітаємо, ${data.name}! Введіть пароль для входу.`;
-                    document.getElementById('blog-title').innerText = `Блог: ${data.name}`;
-                    
-                    // Якщо користувач вже залогінений у сесії, оновлюємо дані з бази (у разі зміни ролі в базі)
-                    if (userData) {
-                        userData = data;
-                        sessionStorage.setItem('userData', JSON.stringify(userData));
-                        updateNavUI();
-                    }
+                    userData = snap.data();
+                    document.getElementById('login-welcome').innerText = `Вітаємо, ${userData.name}! Роль: ${userData.role}.`;
+                    // Оновлений статичний заголовок
+                    document.getElementById('blog-title').innerHTML = `АВТОРСЬКИЙ <span class="text-indigo-600">БЛОГ</span>`;
+                    updateNavUI();
                 } else {
                     navigateTo('setup');
                 }
             } catch (e) {
-                if (e.code === 'permission-denied') showErrorAlert("Налаштуйте Firestore Rules.");
+                if (e.code === 'permission-denied') showErrorAlert("Права заблоковано Firestore Rules.");
             }
         };
 
@@ -307,8 +364,7 @@
                 articles.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 renderHome(articles);
                 renderAdminList(articles);
-                const loader = document.getElementById('initial-loader');
-                if (loader) loader.remove();
+                document.getElementById('initial-loader')?.classList.add('hidden');
             });
         };
 
@@ -316,7 +372,7 @@
         window.handleAdminClick = () => {
             if (userData) {
                 if (userData.role === 'admin') navigateTo('admin');
-                else showMessage("Доступ обмежено. Ваша роль: user. Змініть роль у базі даних.");
+                else showMessage("Доступ обмежено. Змініть роль на 'admin' у базі даних.");
             } else {
                 navigateTo('login');
             }
@@ -327,20 +383,17 @@
             const name = document.getElementById('setup-name').value;
             const pass = document.getElementById('setup-password').value;
             try {
-                // Автоматично ставимо роль 'user'
-                const newUserData = { name, role: 'user', password: pass, createdAt: serverTimestamp() };
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), newUserData);
-                userData = newUserData;
-                sessionStorage.setItem('userData', JSON.stringify(userData));
-                showMessage("Профіль створено з роллю user!");
+                const data = { name, role: 'user', password: pass, createdAt: serverTimestamp() };
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), data);
+                await syncUserData();
+                showMessage("Профіль створено! Роль: user.");
                 navigateTo('home');
-            } catch (err) { showMessage("Помилка збереження."); }
+            } catch (err) { showMessage("Помилка запису."); }
         });
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const pass = document.getElementById('admin-password-input').value;
-            
             const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
             const snap = await getDoc(settingsDoc);
             
@@ -348,37 +401,37 @@
                 const data = snap.data();
                 if (pass === data.password) {
                     userData = data;
-                    sessionStorage.setItem('userData', JSON.stringify(userData));
-                    showMessage(`Вхід успішний! Роль: ${data.role}`);
+                    showMessage(`Вхід успішний! Вітаємо, ${data.name}.`);
                     if (data.role === 'admin') navigateTo('admin');
                     else navigateTo('home');
                 } else {
-                    showMessage("Невірний пароль!");
+                    showMessage("Невірний код доступу.");
                 }
             }
         });
 
         window.logoutUser = () => {
             userData = null;
-            sessionStorage.removeItem('userData');
             navigateTo('home');
-            showMessage("Ви вийшли");
+            showMessage("Ви вийшли з системи.");
         };
 
-        // Articles Rendering
+        // Rendering
         const renderHome = (articles) => {
             const container = document.getElementById('articles-container');
             if (!container) return;
             if (articles.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">Статті відсутні.</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-xs">Немає жодної публікації</div>`;
                 return;
             }
             container.innerHTML = articles.map(a => `
-                <div class="article-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 cursor-pointer" onclick="viewArticle('${a.id}')">
-                    <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full uppercase">${a.category || 'Загальне'}</span>
-                    <h3 class="text-xl font-bold mt-3 mb-2">${a.title}</h3>
-                    <p class="text-gray-500 text-sm line-clamp-2">${a.content}</p>
-                    <div class="mt-4 text-blue-600 text-xs font-bold">Детальніше →</div>
+                <div class="article-card group bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50 cursor-pointer flex flex-col h-full" onclick="viewArticle('${a.id}')">
+                    <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-extrabold rounded-full uppercase mb-4 w-fit tracking-wider">${a.category || 'Загальне'}</span>
+                    <h3 class="text-2xl font-extrabold mb-4 group-hover:text-indigo-600 transition-colors tracking-tight">${a.title}</h3>
+                    <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed">${a.content}</p>
+                    <div class="mt-auto pt-4 border-t border-slate-50 text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                        ${a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleDateString() : 'Зараз'}
+                    </div>
                 </div>
             `).join('');
         };
@@ -387,18 +440,18 @@
             const list = document.getElementById('admin-articles-list');
             if (!list) return;
             if (!userData || userData.role !== 'admin') {
-                list.innerHTML = `<p class="text-center py-4 text-gray-400 italic text-sm">Цей список доступний лише для ролі admin. Поточна роль: ${userData ? userData.role : 'гість'}.</p>`;
+                list.innerHTML = `<p class="text-center py-4 text-slate-400 font-medium">Керування доступне лише адміністраторам.</p>`;
                 return;
             }
             list.innerHTML = articles.map(a => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-50 shadow-sm">
                     <div class="truncate mr-4">
-                        <h4 class="font-bold truncate text-gray-800">${a.title}</h4>
-                        <p class="text-xs text-gray-400">${a.category}</p>
+                        <h4 class="font-extrabold truncate text-slate-800">${a.title}</h4>
+                        <span class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">${a.category}</span>
                     </div>
-                    <div class="flex space-x-1">
-                        <button onclick="editArticle('${a.id}')" class="p-2 text-blue-500 hover:bg-white rounded-lg"><i class="fas fa-edit"></i></button>
-                        <button onclick="confirmDelete('${a.id}')" class="p-2 text-red-500 hover:bg-white rounded-lg"><i class="fas fa-trash"></i></button>
+                    <div class="flex space-x-2 shrink-0">
+                        <button onclick="editArticle('${a.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors"><i class="fas fa-edit"></i></button>
+                        <button onclick="confirmDelete('${a.id}')" class="w-10 h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -409,36 +462,50 @@
             if (snap.exists()) {
                 const d = snap.data();
                 document.getElementById('article-full-content').innerHTML = `
-                    <span class="text-blue-600 font-bold uppercase text-xs tracking-widest">${d.category || 'Загальне'}</span>
-                    <h1 class="text-4xl font-extrabold mt-2 mb-6 text-gray-900">${d.title}</h1>
-                    <div class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">${d.content}</div>
+                    <h1 class="text-4xl font-extrabold mb-6 leading-tight tracking-tight">${d.title}</h1>
+                    <div class="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">${d.content}</div>
                 `;
                 navigateTo('detail');
             }
         };
 
-        // CRUD Articles
+        // CRUD
         document.getElementById('article-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!userData || userData.role !== 'admin') return showMessage("Потрібні права адміністратора.");
+            if (!userData || userData.role !== 'admin') {
+                showMessage("Відмовлено в доступі. Потрібна роль адміна.");
+                return;
+            }
             
             const title = document.getElementById('post-title').value;
             const category = document.getElementById('post-category').value;
             const content = document.getElementById('post-content').value;
             const editId = document.getElementById('edit-id').value;
+            const btn = document.getElementById('submit-btn');
+
+            btn.disabled = true;
+            btn.innerText = "Збереження...";
 
             try {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
                 if (editId) {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId), {
                         title, category, content, updatedAt: serverTimestamp()
                     });
+                    showMessage("Зміни збережено!");
                 } else {
-                    await addDoc(colRef, { title, category, content, createdAt: serverTimestamp(), author: userData.name });
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'articles'), { 
+                        title, category, content, createdAt: serverTimestamp() 
+                    });
+                    showMessage("Опубліковано успішно!");
                 }
                 resetForm();
-                showMessage("Дані збережено!");
-            } catch (err) { showMessage("Помилка доступу до бази."); }
+            } catch (err) { 
+                console.error(err);
+                showMessage(err.code === 'permission-denied' ? "Помилка прав доступу Firestore." : "Помилка бази даних.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Опублікувати";
+            }
         });
 
         window.editArticle = async (id) => {
@@ -449,7 +516,7 @@
                 document.getElementById('post-title').value = d.title;
                 document.getElementById('post-category').value = d.category;
                 document.getElementById('post-content').value = d.content;
-                document.getElementById('form-title').innerHTML = `<i class="fas fa-edit mr-3 text-orange-500"></i> Редагувати статтю`;
+                document.getElementById('form-title').innerHTML = `<i class="fas fa-magic mr-4"></i> Редагування`;
                 document.getElementById('submit-btn').innerText = "Оновити";
                 document.getElementById('cancel-edit').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -459,32 +526,30 @@
         const resetForm = () => {
             document.getElementById('article-form').reset();
             document.getElementById('edit-id').value = "";
-            document.getElementById('form-title').innerHTML = `<i class="fas fa-plus-circle mr-3 text-blue-600"></i> Нова стаття`;
+            document.getElementById('form-title').innerHTML = `<i class="fas fa-pen-nib mr-4"></i> Створити запис`;
             document.getElementById('submit-btn').innerText = "Опублікувати";
             document.getElementById('cancel-edit').classList.add('hidden');
         };
 
-        const cancelEditBtn = document.getElementById('cancel-edit');
-        if (cancelEditBtn) cancelEditBtn.onclick = resetForm;
+        const cancelBtn = document.getElementById('cancel-edit');
+        if (cancelBtn) cancelBtn.onclick = resetForm;
 
         window.confirmDelete = (id) => {
             deleteIdPending = id;
             document.getElementById('confirm-modal').classList.add('modal-active');
         };
 
-            const modalCancel = document.getElementById('modal-cancel');
-            if (modalCancel) modalCancel.onclick = () => {
+        document.getElementById('modal-cancel').onclick = () => {
             document.getElementById('confirm-modal').classList.remove('modal-active');
             deleteIdPending = null;
         };
 
-            const modalConfirm = document.getElementById('modal-confirm');
-            if (modalConfirm) modalConfirm.onclick = async () => {
+        document.getElementById('modal-confirm').onclick = async () => {
             if (deleteIdPending) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', deleteIdPending));
-                    showMessage("Видалено успішно");
-                } catch (e) { showMessage("Помилка видалення"); }
+                    showMessage("Запис видалено.");
+                } catch (e) { showMessage("Помилка видалення."); }
                 document.getElementById('confirm-modal').classList.remove('modal-active');
             }
         };
